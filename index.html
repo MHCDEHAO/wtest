@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>服务器整机检测与老化测试 Shell 脚本</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif;background:#f5f7fa;color:#1a1a2e;line-height:1.7;font-size:15px}
+.wrapper{max-width:720px;margin:0 auto;padding:48px 24px 64px}
+.header{margin-bottom:40px}
+.tag{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.06em;color:#fff;background:#1a1a2e;padding:3px 10px;border-radius:3px;margin-bottom:14px}
+h1{font-size:26px;font-weight:700;line-height:1.3;color:#0f0f1a;margin-bottom:12px}
+.subtitle{font-size:15px;color:#555}
+.divider{border:none;border-top:1px solid #e0e4ea;margin:32px 0}
+.section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#888;margin-bottom:16px}
+.intro{color:#333;font-size:15px}
+.feature-list,.scene-list{list-style:none}
+.feature-list li,.scene-list li{position:relative;padding-left:20px;margin-bottom:10px;color:#333}
+.feature-list li::before,.scene-list li::before{content:'';position:absolute;left:0;top:9px;width:7px;height:7px;background:#1a1a2e;border-radius:50%}
+.stack-wrap{display:flex;flex-wrap:wrap;gap:8px}
+.stack-tag{display:inline-block;font-size:13px;font-weight:500;color:#1a1a2e;background:#e8eaf0;border:1px solid #d0d5dd;padding:4px 12px;border-radius:4px}
+.btn{display:inline-flex;align-items:center;gap:8px;margin-top:8px;font-size:15px;font-weight:600;color:#fff;background:#1a1a2e;border:2px solid #1a1a2e;border-radius:6px;padding:12px 24px;text-decoration:none;transition:background .15s}
+.btn:hover{background:#2d2d44}
+.btn svg{width:18px;height:18px;fill:currentColor}
+.footer{margin-top:48px;font-size:13px;color:#999;text-align:center}
+@media(max-width:480px){.wrapper{padding:32px 18px 48px}h1{font-size:22px}.btn{width:100%;justify-content:center}}
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="header"><span class="tag">Shell 项目</span><h1>服务器整机检测与老化测试 Shell 脚本</h1><p class="subtitle">x86 服务器硬件预检、诊断与 burn-in 验证，双脚本分工覆盖全链路测试流程</p></div>
+  <hr class="divider">
+  <div><p class="section-title">项目简介</p><p class="intro">本套件包含两个 Bash 脚本：<strong>MHCtest.sh</strong>负责整机普通检测（CPU/GPU/风扇/电源/硬盘SMART/网卡打流/PCIe/CMOS预检、dmesg 与 BMC SEL 日志巡检、硬盘指示灯点灯测试、USB 速率检测），<strong>MHC.sh</strong>负责压力老化测试（FIO 磁盘压测、stress-ng CPU 烤机、memtester 内存压测、gpu-burn 双精度计算、NCCL 多卡带宽），并附带后台温度/功耗监控与 CSV 曲线记录。全程一键运行，无需额外依赖，支持非交互自动化模式，可在 CentOS、Ubuntu、RHEL 等主流 x86 Linux 发行版上直接执行。</p></div>
+  <hr class="divider">
+  <div><p class="section-title">核心功能</p><ul class="feature-list"><li>依赖工具批量预检 + 自动安装（apt/yum/dnf 通用）</li><li>CPU 温度、GPU 状态、风扇转速、电源模块预检</li><li>硬盘 SMART 健康度与错误日志采集</li><li>iperf3 双向打流（支持对端打流与全自动本机自回环两种模式）</li><li>dmesg 内核日志与 BMC SEL 日志关键字扫描（error/warning）</li><li>硬盘指示灯三色人工确认测试（蓝灯/橙灯/熄灭）</li><li>USB 总线拓扑与速率人工判定</li><li>FIO 顺序读写压测、stress-ng CPU 烤机、memtester 内存压力</li><li>gpu-burn 双精度 GPU 计算稳定性验证</li><li>NCCL All-Reduce 多卡带宽测试（≥2 张 GPU 自动执行）</li><li>后台实时监控：CPU 温度、整机功耗、GPU 温度与利用率，输出 CSV 曲线数据</li><li>完整时间校验（系统与 BMC 偏差限 60 秒）、自动化工号与 SN 录入</li><li>Ctrl+C 安全退出处理（终止后台进程、清理临时文件）</li></ul></div>
+  <hr class="divider">
+  <div><p class="section-title">技术栈</p><div class="stack-wrap"><span class="stack-tag">Bash</span><span class="stack-tag">iperf3</span><span class="stack-tag">fio</span><span class="stack-tag">stress-ng</span><span class="stack-tag">memtester</span><span class="stack-tag">gpu-burn</span><span class="stack-tag">smartctl</span><span class="stack-tag">ipmitool</span><span class="stack-tag">nccl-tests</span><span class="stack-tag">awk / sed</span></div></div>
+  <hr class="divider">
+  <div><p class="section-title">适用场景</p><ul class="scene-list"><li>x86 服务器出厂硬件检测与验收测试</li><li>设备入库前的 burn-in 老化验证</li><li>数据中心批量服务器并行测试流程</li><li>硬件故障排查与日志采集自动化</li><li>无 GUI 环境的纯命令行远程测试</li></ul></div>
+  <hr class="divider">
+  <div><p class="section-title">源码仓库</p><a class="btn" href="#" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38v-1.32c-2.23.48-2.7-1.07-2.7-1.07-.36-.93-.89-1.18-.89-1.18-.73-.5.05-.49.05-.49.8.06 1.23.83 1.23.83.72 1.24 1.89.88 2.34.67.07-.52.28-.88.51-1.08-1.78-.2-3.65-.89-3.65-3.97 0-.88.31-1.59.83-2.15-.08-.21-.36-1.02.08-2.13 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.11.16 1.92.08 2.13.52.56.83 1.27.83 2.15 0 3.08-1.88 3.76-3.67 3.96.29.25.54.74.54 1.5v2.22c0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>查看 GitHub 源码</a></div>
+  <div class="footer">&copy; 2026 蒙泓呈 &middot; 个人学习项目</div>
+</div>
+</body>
+</html>
