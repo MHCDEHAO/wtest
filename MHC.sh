@@ -4,7 +4,7 @@
 #个人学习项目，仅用于求职技术展示
 #服务器整机老化测试脚本（burn-in test）
 # 适用：x86 服务器（GPU/数据盘/BMC 可选，缺失项自动跳过）
-# 用法：sudo bash DWlhtest.sh
+# 用法：sudo bash MHC.sh
 # 自动化/非交互运行示例：
 #   TEST_ID=DWZN123456 SERVER_SN=SN0001 \
 #   TEST_TIME=600 FIO_RUN_TIME=300 MEM_RATIO=75 \
