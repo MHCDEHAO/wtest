@@ -10,7 +10,7 @@
 # 自动化：TEST_ID=DWZN123456 SERVER_SN=SN0001 LED_TEST=0 \
 #   IPERF_PAIRS="10.0.1.1:10.0.1.2 10.0.2.1:10.0.2.2" \
 #   全自动自回环（无需对端机器）：IPERF_AUTO_LOOPBACK=1，IPERF_PAIRS留空，自动找2个物理网口打流
-#   sudo bash DWtest.sh
+#   sudo bash MHCtest.sh
 # 日志输出：运行目录下 <SN>test1.log/ 文件夹
 # ============================================================
 
