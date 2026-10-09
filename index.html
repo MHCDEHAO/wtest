@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>服务器整机验收测试脚本集 · wtest</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --card2: #1c2128;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --teal: #2dd4a7;
+    --blue: #58a6ff;
+    --amber: #d29922;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 64px 0 48px;
+    background: linear-gradient(180deg, rgba(45,212,167,0.04), transparent);
+  }
+  .badge {
+    display: inline-block; font-family: var(--mono); font-size: 12px;
+    color: var(--teal); border: 1px solid rgba(45,212,167,0.35);
+    padding: 3px 10px; border-radius: 20px; margin-bottom: 18px;
+  }
+  h1 { font-size: 34px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 14px; }
+  .lead { color: var(--muted); font-size: 16px; max-width: 660px; }
+
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 1px; background: var(--border);
+    border: 1px solid var(--border); border-radius: 10px;
+    overflow: hidden; margin-top: 34px;
+  }
+  .stat { background: var(--card); padding: 18px 20px; }
+  .stat .n { font-size: 24px; font-weight: 600; color: var(--teal); font-family: var(--mono); }
+  .stat .l { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+
+  section { padding: 52px 0; border-bottom: 1px solid var(--border); }
+  h2 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+  .sub { color: var(--muted); font-size: 14px; margin-bottom: 26px; }
+
+  .feats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .feat {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .feat h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+  .feat p { font-size: 13.5px; color: var(--muted); }
+  .feat code {
+    font-family: var(--mono); font-size: 12.5px;
+    background: var(--card2); padding: 1px 6px; border-radius: 4px; color: var(--teal);
+  }
+
+  .group { margin-bottom: 34px; }
+  .group h3 {
+    font-size: 14px; font-weight: 600; color: var(--blue);
+    margin-bottom: 12px; display: flex; align-items: center; gap: 10px;
+  }
+  .group h3::after {
+    content: ""; flex: 1; height: 1px; background: var(--border);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    text-align: left; font-weight: 500; color: var(--muted); font-size: 12.5px;
+    padding: 8px 12px; border-bottom: 1px solid var(--border);
+  }
+  td { padding: 9px 12px; border-bottom: 1px solid rgba(48,54,61,0.5); }
+  tr:hover td { background: var(--card); }
+  td.name { font-family: var(--mono); color: var(--teal); white-space: nowrap; }
+  td.lines { font-family: var(--mono); color: var(--muted); text-align: right; white-space: nowrap; }
+  td.disk { text-align: center; color: var(--muted); font-size: 12.5px; }
+  .yes { color: var(--amber); }
+  .no { color: var(--muted); }
+
+  pre {
+    background: #010409; border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px 20px; overflow-x: auto;
+    font-family: var(--mono); font-size: 13px; line-height: 1.8;
+    color: #c9d1d9;
+  }
+  pre .c { color: #6e7681; }
+  pre .g { color: var(--teal); }
+
+  .notice {
+    background: rgba(210,153,34,0.06);
+    border: 1px solid rgba(210,153,34,0.25);
+    border-radius: 10px; padding: 20px 24px; font-size: 14px;
+    color: #d8c9a8;
+  }
+  .notice strong { color: var(--amber); font-weight: 500; }
+
+  footer {
+    padding: 40px 0 64px; color: var(--muted); font-size: 13.5px;
+  }
+  footer a { color: var(--blue); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 720px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .feats { grid-template-columns: 1fr; }
+    h1 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="badge">wtest · x86 server acceptance toolkit</div>
+    <h1>服务器整机验收测试脚本集</h1>
+    <p class="lead">面向 x86 服务器整机验收的 Shell 工具集。覆盖硬件预检、日志会话控制、部件检测、网络打流与老化压测全流程，统一判定口径，可直接在 Ubuntu / CentOS / RHEL 上执行。</p>
+
+    <div class="stats">
+      <div class="stat"><div class="n">23</div><div class="l">独立脚本</div></div>
+      <div class="stat"><div class="n">15,090</div><div class="l">Shell 代码行数</div></div>
+      <div class="stat"><div class="n">5</div><div class="l">超过 1000 行的核心脚本</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">态统一判定 PASS/FAIL/Pending</div></div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>设计要点</h2>
+    <p class="sub">这套脚本不是零散命令的堆叠，而是按验收流程设计的工具链。</p>
+    <div class="feats">
+      <div class="feat">
+        <h3>统一判定口径</h3>
+        <p>全集采用 <code>PASS</code> / <code>FAIL</code> / <code>Pending</code> 三态判定，配 <code>0 / 1 / 2</code> 退出码，可直接接入上层流水线。</p>
+      </div>
+      <div class="feat">
+        <h3>不落盘，不改变被测系统</h3>
+        <p>绝大多数脚本运行时不写任何文件、不修改系统状态，验收过程本身不引入新的变量。</p>
+      </div>
+      <div class="feat">
+        <h3>依赖自愈</h3>
+        <p>启动即做依赖工具预检，缺失时按 <code>apt</code> / <code>dnf</code> / <code>yum</code> 自动安装，减少现场准备成本。</p>
+      </div>
+      <div class="feat">
+        <h3>跨发行版可用</h3>
+        <p>在 Ubuntu、CentOS、RHEL 等主流 Linux 发行版上可直接执行；GPU 相关项在无卡机器上自动跳过。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>脚本总览</h2>
+    <p class="sub">按「总控与会话 → 部件检测 → 网络验证」分组。行数由源码统计。</p>
+
+    <div class="group">
+      <h3>总控与会话类</h3>
+      <table>
+        <tr><th>脚本</th><th>定位</th><th style="text-align:right">行数</th><th style="text-align:center">落盘</th></tr>
+        <tr><td class="name">test.sh</td><td>整机硬件预检总入口（只查硬件，不管日志）</td><td class="lines">1,493</td><td class="disk no">否</td></tr>
+        <tr><td class="name">log.sh</td><td>验收日志会话控制器（终端台账 + 内核 / SEL 采集巡检）</td><td class="lines">1,241</td><td class="disk yes">是</td></tr>
+        <tr><td class="name">lhtest.sh</td><td>整机老化压力测试（CPU / 内存 / GPU / 硬盘）</td><td class="lines">2,433</td><td class="disk yes">是</td></tr>
+        <tr><td class="name">dcpower.sh</td><td>DC 电源循环测试（反复硬断电 + 配置漂移比对）</td><td class="lines">1,826</td><td class="disk yes">是</td></tr>
+        <tr><td class="name">time.sh</td><td>RTC 走时 / 时区口径 / NTP 同步 / BMC 时间验收</td><td class="lines">1,100</td><td class="disk no">否</td></tr>
+      </table>
+    </div>
+
+    <div class="group">
+      <h3>部件检测类</h3>
+      <table>
+        <tr><th>脚本</th><th>定位</th><th style="text-align:right">行数</th><th style="text-align:center">落盘</th></tr>
+        <tr><td class="name">cpu.sh</td><td>CPU 在位检测</td><td class="lines">142</td><td class="disk no">否</td></tr>
+        <tr><td class="name">mem.sh</td><td>内存条信息读取（dmidecode 解析）</td><td class="lines">256</td><td class="disk no">否</td></tr>
+        <tr><td class="name">gpu.sh</td><td>显卡 9 项检测</td><td class="lines">602</td><td class="disk no">否</td></tr>
+        <tr><td class="name">GPUdingwei.sh</td><td>单卡定位压测（配合 BMC 温度定位物理槽位）</td><td class="lines">298</td><td class="disk no">否</td></tr>
+        <tr><td class="name">smart.sh</td><td>硬盘 SMART 验收（NVMe / SATA+SAS 双套逻辑）</td><td class="lines">510</td><td class="disk no">否</td></tr>
+        <tr><td class="name">fio.sh</td><td>磁盘顺序读写压力测试（会清数据）</td><td class="lines">728</td><td class="disk no">否</td></tr>
+        <tr><td class="name">led.sh</td><td>硬盘指示灯点灯测试</td><td class="lines">303</td><td class="disk no">否</td></tr>
+        <tr><td class="name">pcie.sh</td><td>独立 PCIe 链路状态检测</td><td class="lines">117</td><td class="disk no">否</td></tr>
+        <tr><td class="name">fru.sh</td><td>整机 FRU 信息读取（型号 / 序列号）</td><td class="lines">195</td><td class="disk no">否</td></tr>
+        <tr><td class="name">bat.sh</td><td>CMOS 纽扣电池检测</td><td class="lines">239</td><td class="disk no">否</td></tr>
+        <tr><td class="name">fan.sh</td><td>风扇状态与转速检测</td><td class="lines">230</td><td class="disk no">否</td></tr>
+        <tr><td class="name">psu.sh</td><td>电源在位 / 冗余 / FRU / 功耗检测</td><td class="lines">254</td><td class="disk no">否</td></tr>
+        <tr><td class="name">bios_check.sh</td><td>BIOS 关键设置检查</td><td class="lines">204</td><td class="disk no">否</td></tr>
+      </table>
+    </div>
+
+    <div class="group">
+      <h3>网络验证类</h3>
+      <table>
+        <tr><th>脚本</th><th>定位</th><th style="text-align:right">行数</th><th style="text-align:center">落盘</th></tr>
+        <tr><td class="name">cx.sh</td><td>NVIDIA / Mellanox 网卡验收（配置单符合性）</td><td class="lines">653</td><td class="disk no">否</td></tr>
+        <tr><td class="name">chip_loop.sh</td><td>网卡「芯片自环」（不用插线）</td><td class="lines">554</td><td class="disk no">否</td></tr>
+        <tr><td class="name">ib_2.sh</td><td>两张不同网卡 RDMA 对打</td><td class="lines">530</td><td class="disk no">否</td></tr>
+        <tr><td class="name">nic_loop.sh</td><td>单张双口网卡端口自环</td><td class="lines">434</td><td class="disk no">否</td></tr>
+        <tr><td class="name">iperf3.sh</td><td>TCP 网络打流验收</td><td class="lines">748</td><td class="disk no">否</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>使用方式</h2>
+    <p class="sub">在脚本所在目录执行。SN 自动从 BMC FRU 读取，无需手动输入。</p>
+    <pre><span class="c"># 整机硬件预检（一次跑完所有在位与状态检查）</span>
+sudo bash test.sh
+
+<span class="c"># 开启一次验收记录会话，此后终端所有输出同时写入台账</span>
+sudo ./log.sh
+
+<span class="c"># 老化压测与电源循环需在会话外单独执行</span>
+sudo bash lhtest.sh
+sudo bash dcpower.sh</pre>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>验证状态说明</h2>
+    <div class="notice">
+      <strong>关于验证状态，请先看这条。</strong><br><br>
+      本套脚本中有<strong>小部分</strong>是在开发阶段<strong>没有测试环境</strong>的情况下完成的，<strong>尚未经过实机验证</strong>。这些脚本的逻辑与阈值虽已按公开规格与验收 SOP 仔细推敲，但仍可能存在与实际机型 / BMC / 驱动版本不符之处。<br><br>
+      使用前建议：先核对脚本内的阈值与判定口径是否符合本次验收要求，并尽量先在非生产环境试跑一遍。脚本头部注释里凡是有「设计说明」一节的，都已写明该处为什么这么写、以及已知的取舍与限制，可作为核对依据。
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    本套脚本持续更新、持续优化，并持续新增测试项目。若发现脚本与文档描述不一致，以脚本源码为准。<br><br>
+    源码仓库：<a href="https://github.com/MHCDEHAO/wtest">github.com/MHCDEHAO/wtest</a>
+  </div>
+</footer>
+
+</body>
+</html>
